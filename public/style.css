@@ -1,0 +1,25 @@
+.form-row {
+    width: 600px;
+}
+
+.form-row label, input, textarea {
+    width: 45%;
+    float: left;
+    margin: 15px;
+    padding: 3px;
+}
+.form-row textarea{
+    overflow: auto;
+    height: 150px;
+}
+.form-row label, button{
+    width: 20%;
+    float: left;
+    margin: 15px;
+}
+
+.sendForm {
+    height: 500px;
+    width: 600px;
+}
+

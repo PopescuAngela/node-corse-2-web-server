@@ -1,16 +1,19 @@
 const emailLogger = require('../util/currentEmailLogger');
+const emailService = require('./email_service');
 
 var from;
+var password;
 var toEmailList;
 var messageText;
 var subject;
 
 //async call to send email to a list
-var sendEmailToList = (from, toEmailList, subject, message, timeoutValue) =>{
+var sendEmailToList = (from, password, toEmailList, subject, message, timeoutValue) =>{ 
     this.from = from;
     this.toEmailList = toEmailList;
     this.subject = subject;
     this.messageText = message;
+    this.password = password;
     if(!toEmailList){
         emailLogger.logExceptionToCurrentEmailHistory('Call send Email with list empty');
         return;
@@ -18,27 +21,29 @@ var sendEmailToList = (from, toEmailList, subject, message, timeoutValue) =>{
 
     //1. Split to by ,
     var toArray = toEmailList.split(",");
-    if (toArray){
-        toArray.forEach(((item) => {
-            sendEmail(item, timeoutValue);
-       }));
-    }
-}
+    // return new Promise ((resolve, reject) => {
+        if (toArray){
+            toArray.forEach(((item) => {
+                sendEmail(item, timeoutValue);
+           }));
+        }
+    // });
+}    
 
 var sendEmail = (email, timeout) =>{
      // 1. Try to get the last name from email
-     var firstName = retrieveLastNameFromEmail(email);
+    var firstName = retrieveLastNameFromEmail(email);
      // 2. Update the message based on last name if exists
-     var formattedMessage = formatEmailMessage(firstName);  
-     emailLogger.logToCurrentEmailHistory(from, email, subject, formattedMessage);
-     waitSeconds(timeout*1000);
-     console.log(`Email send to ${email}`);
+    var formattedMessage = formatEmailMessage(firstName);  
+       // setup email data with unicode symbols
+    emailService.sendMail(this.from, this.password, email, this.subject, formattedMessage, (errorMessage, result)=> {
+        waitSeconds(timeout*1000);
+    }); 
 }
 
 var retrieveLastNameFromEmail = (email) => {
     if(email) {
-       if(email.includes(".") === true) {
-           console.log(email.split(".")[0])
+       if(email.split("@")[0].includes(".") === true) {
            return email.split(".")[0];
        }
     }
@@ -57,7 +62,7 @@ var formatEmailMessage = (firstName) => {
     return this.messageText;
 }
 
-function waitSeconds(iMilliSeconds) {
+ var waitSeconds = (iMilliSeconds) => {
     var counter= 0
         , start = new Date().getTime()
         , end = 0;
